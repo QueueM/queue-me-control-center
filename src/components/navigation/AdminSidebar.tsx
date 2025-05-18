@@ -17,12 +17,12 @@ import {
   LayoutDashboard, 
   Users, 
   Store, 
-  Subscriptions, 
   CreditCard, 
   MessageSquare, 
   BarChart, 
   Bell, 
-  Settings 
+  Settings,
+  BookOpen // Replacing Subscriptions with BookOpen for subscription-related functionality
 } from "lucide-react";
 
 const AdminSidebar: React.FC = () => {
@@ -31,7 +31,7 @@ const AdminSidebar: React.FC = () => {
     { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
     { name: 'Users', icon: Users, path: '/users' },
     { name: 'Shops', icon: Store, path: '/shops' },
-    { name: 'Subscriptions', icon: Subscriptions, path: '/subscriptions' },
+    { name: 'Subscriptions', icon: BookOpen, path: '/subscriptions' },
     { name: 'Payments', icon: CreditCard, path: '/payments' },
     { name: 'Chat Support', icon: MessageSquare, path: '/support' },
     { name: 'Analytics', icon: BarChart, path: '/analytics' },
