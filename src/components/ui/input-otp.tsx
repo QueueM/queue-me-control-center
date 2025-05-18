@@ -35,7 +35,7 @@ const InputOTPSlot = React.forwardRef<
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
   
-  // Add a check to ensure inputOTPContext and slots exist before accessing them
+  // Safely extract slot data with proper null checks
   const slot = inputOTPContext?.slots?.[index] || { char: '', hasFakeCaret: false, isActive: false }
   const { char, hasFakeCaret, isActive } = slot
 
@@ -47,6 +47,9 @@ const InputOTPSlot = React.forwardRef<
         isActive && "z-10 ring-2 ring-ring ring-offset-background",
         className
       )}
+      // Convert React camelCase props to lowercase HTML attributes to avoid warnings
+      data-active={isActive ? true : undefined}
+      data-fake-caret={hasFakeCaret ? true : undefined}
       {...props}
     >
       {char}

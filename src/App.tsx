@@ -48,7 +48,28 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  // Use Navigate component instead of redirect for proper React Router navigation
   return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+// Login route with protection against authenticated users accessing login page
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
+  
+  if (isAuthenticated === null) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
+  return isAuthenticated ? <Navigate to="/" replace /> : children;
 };
 
 const App = () => (
@@ -57,7 +78,14 @@ const App = () => (
       <Toaster />
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            } 
+          />
           
           {/* Protected Routes */}
           <Route 

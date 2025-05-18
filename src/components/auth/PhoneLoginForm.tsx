@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { motion } from "framer-motion";
 import api from "@/services/api";
 
 const PhoneLoginForm = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -99,8 +101,8 @@ const PhoneLoginForm = () => {
         description: "Welcome to QueueMe Admin Dashboard",
       });
       
-      // Redirect to dashboard
-      window.location.href = '/';
+      // Use navigate instead of window.location for React Router navigation
+      navigate('/');
     } catch (error) {
       toast({
         title: "Verification Failed",
