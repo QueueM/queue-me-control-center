@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
@@ -13,8 +13,10 @@ import SupportPage from "@/pages/Support";
 import AnalyticsPage from "@/pages/Analytics";
 import NotificationsPage from "@/pages/Notifications";
 import SettingsPage from "@/pages/Settings";
+import LoginPage from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import { PageTransition } from "@/components/ui/page-transition";
+import { useEffect, useState } from "react";
 
 // Create a client with default options
 const queryClient = new QueryClient({
@@ -27,102 +29,154 @@ const queryClient = new QueryClient({
   },
 });
 
+// Auth check component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Check for token in localStorage
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  // Show loading while checking auth
+  if (isAuthenticated === null) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          
+          {/* Protected Routes */}
           <Route 
             path="/" 
             element={
-              <AdminLayout>
-                <PageTransition>
-                  <DashboardPage />
-                </PageTransition>
-              </AdminLayout>
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PageTransition>
+                    <DashboardPage />
+                  </PageTransition>
+                </AdminLayout>
+              </ProtectedRoute>
             } 
           />
+          
           <Route 
             path="/users" 
             element={
-              <AdminLayout>
-                <PageTransition>
-                  <UsersPage />
-                </PageTransition>
-              </AdminLayout>
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PageTransition>
+                    <UsersPage />
+                  </PageTransition>
+                </AdminLayout>
+              </ProtectedRoute>
             } 
           />
+          
           <Route 
             path="/shops" 
             element={
-              <AdminLayout>
-                <PageTransition>
-                  <ShopsPage />
-                </PageTransition>
-              </AdminLayout>
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PageTransition>
+                    <ShopsPage />
+                  </PageTransition>
+                </AdminLayout>
+              </ProtectedRoute>
             } 
           />
+          
           <Route 
             path="/subscriptions" 
             element={
-              <AdminLayout>
-                <PageTransition>
-                  <SubscriptionsPage />
-                </PageTransition>
-              </AdminLayout>
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PageTransition>
+                    <SubscriptionsPage />
+                  </PageTransition>
+                </AdminLayout>
+              </ProtectedRoute>
             } 
           />
+          
           <Route 
             path="/payments" 
             element={
-              <AdminLayout>
-                <PageTransition>
-                  <PaymentsPage />
-                </PageTransition>
-              </AdminLayout>
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PageTransition>
+                    <PaymentsPage />
+                  </PageTransition>
+                </AdminLayout>
+              </ProtectedRoute>
             } 
           />
+          
           <Route 
             path="/support" 
             element={
-              <AdminLayout>
-                <PageTransition>
-                  <SupportPage />
-                </PageTransition>
-              </AdminLayout>
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PageTransition>
+                    <SupportPage />
+                  </PageTransition>
+                </AdminLayout>
+              </ProtectedRoute>
             } 
           />
+          
           <Route 
             path="/analytics" 
             element={
-              <AdminLayout>
-                <PageTransition>
-                  <AnalyticsPage />
-                </PageTransition>
-              </AdminLayout>
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PageTransition>
+                    <AnalyticsPage />
+                  </PageTransition>
+                </AdminLayout>
+              </ProtectedRoute>
             } 
           />
+          
           <Route 
             path="/notifications" 
             element={
-              <AdminLayout>
-                <PageTransition>
-                  <NotificationsPage />
-                </PageTransition>
-              </AdminLayout>
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PageTransition>
+                    <NotificationsPage />
+                  </PageTransition>
+                </AdminLayout>
+              </ProtectedRoute>
             } 
           />
+          
           <Route 
             path="/settings" 
             element={
-              <AdminLayout>
-                <PageTransition>
-                  <SettingsPage />
-                </PageTransition>
-              </AdminLayout>
+              <ProtectedRoute>
+                <AdminLayout>
+                  <PageTransition>
+                    <SettingsPage />
+                  </PageTransition>
+                </AdminLayout>
+              </ProtectedRoute>
             } 
           />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
