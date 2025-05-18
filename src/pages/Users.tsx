@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   Table,
@@ -241,10 +242,12 @@ const UsersPage = () => {
   }
 
   const BadgeComponent = ({ type }: { type: string }) => {
-    let variant = "default";
-    if (type === "Active") variant = "success";
+    // Fix: Use proper variant values that match the allowed types
+    let variant: "default" | "destructive" | "secondary" | "outline" = "default";
+    
+    if (type === "Active") variant = "default";
     if (type === "Inactive") variant = "destructive";
-    if (type === "Pending") variant = "warning";
+    if (type === "Pending") variant = "secondary";
 
     return (
       <Badge variant={variant}>
