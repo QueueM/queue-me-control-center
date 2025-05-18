@@ -30,12 +30,14 @@ const UsersPage = () => {
   const { data: users, isLoading, error } = useQuery({
     queryKey: ['users'],
     queryFn: () => userService.getUsers(),
-    onError: () => {
-      toast({
-        title: "Error fetching users",
-        description: "There was a problem loading the users data.",
-        variant: "destructive"
-      });
+    meta: {
+      onError: (err: Error) => {
+        toast({
+          title: "Error fetching users",
+          description: "There was a problem loading the users data.",
+          variant: "destructive"
+        });
+      }
     }
   });
 

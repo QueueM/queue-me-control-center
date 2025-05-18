@@ -31,12 +31,14 @@ const ShopsPage = () => {
   const { data: shops, isLoading, error } = useQuery({
     queryKey: ['shops'],
     queryFn: () => shopService.getShops(),
-    onError: () => {
-      toast({
-        title: "Error fetching shops",
-        description: "There was a problem loading the shops data.",
-        variant: "destructive"
-      });
+    meta: {
+      onError: (err: Error) => {
+        toast({
+          title: "Error fetching shops",
+          description: "There was a problem loading the shops data.",
+          variant: "destructive"
+        });
+      }
     }
   });
 

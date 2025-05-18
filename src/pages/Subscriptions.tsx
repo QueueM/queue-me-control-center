@@ -32,12 +32,14 @@ const SubscriptionsPage = () => {
   const { data: subscriptionData, isLoading, error } = useQuery({
     queryKey: ['subscriptions'],
     queryFn: () => subscriptionService.getSubscriptionPlans(),
-    onError: (err) => {
-      toast({
-        title: "Error fetching subscriptions",
-        description: "There was a problem loading the subscription data.",
-        variant: "destructive"
-      });
+    meta: {
+      onError: (err: Error) => {
+        toast({
+          title: "Error fetching subscriptions",
+          description: "There was a problem loading the subscription data.",
+          variant: "destructive"
+        });
+      }
     }
   });
 

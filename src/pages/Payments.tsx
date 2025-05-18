@@ -31,12 +31,14 @@ const PaymentsPage = () => {
   const { data: paymentsData, isLoading, error } = useQuery({
     queryKey: ['payments'],
     queryFn: () => paymentService.getPayments(),
-    onError: (err) => {
-      toast({
-        title: "Error fetching payments",
-        description: "There was a problem loading the payments data.",
-        variant: "destructive"
-      });
+    meta: {
+      onError: (err: Error) => {
+        toast({
+          title: "Error fetching payments",
+          description: "There was a problem loading the payments data.",
+          variant: "destructive"
+        });
+      }
     }
   });
 
