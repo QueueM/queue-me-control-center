@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -31,9 +30,6 @@ const UsersPage = () => {
   const { data: users, isLoading, error } = useQuery({
     queryKey: ['users'],
     queryFn: () => userService.getUsers(),
-    onSuccess: () => {
-      console.log('Users data fetched successfully');
-    },
     onError: () => {
       toast({
         title: "Error fetching users",

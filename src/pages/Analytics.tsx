@@ -14,20 +14,25 @@ import { motion } from 'framer-motion';
 import { BarChart, LineChart, PieChart, ArrowUpRight, Calendar, Download, Filter } from 'lucide-react';
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { format } from "date-fns";
+import { DateRange } from "react-day-picker";
 
 const AnalyticsPage = () => {
-  const [dateRange, setDateRange] = useState({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     to: new Date()
   });
+  
+  const handleDateRangeChange = (range: DateRange) => {
+    setDateRange(range);
+  };
   
   const { data: analyticsData, isLoading } = useQuery({
     queryKey: ['analytics', dateRange],
     queryFn: async () => {
       // In a real app, this would fetch from your API with the date range
       console.log('Fetching analytics data with date range:', 
-        format(dateRange.from, 'yyyy-MM-dd'), 
-        format(dateRange.to, 'yyyy-MM-dd'));
+        dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : 'undefined', 
+        dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : 'undefined');
       
       // Mock data for demonstration
       return {
@@ -109,7 +114,7 @@ const AnalyticsPage = () => {
         <div className="flex items-center gap-2">
           <DateRangePicker
             value={dateRange}
-            onValueChange={setDateRange}
+            onValueChange={handleDateRangeChange}
           />
           
           <Button variant="outline" size="icon" className="ml-2">

@@ -31,9 +31,6 @@ const PaymentsPage = () => {
   const { data: paymentsData, isLoading, error } = useQuery({
     queryKey: ['payments'],
     queryFn: () => paymentService.getPayments(),
-    onSuccess: () => {
-      console.log('Payments data fetched successfully');
-    },
     onError: (err) => {
       toast({
         title: "Error fetching payments",

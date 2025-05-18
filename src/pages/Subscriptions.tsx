@@ -32,9 +32,6 @@ const SubscriptionsPage = () => {
   const { data: subscriptionData, isLoading, error } = useQuery({
     queryKey: ['subscriptions'],
     queryFn: () => subscriptionService.getSubscriptionPlans(),
-    onSuccess: () => {
-      console.log('Subscription data fetched successfully');
-    },
     onError: (err) => {
       toast({
         title: "Error fetching subscriptions",
@@ -46,7 +43,7 @@ const SubscriptionsPage = () => {
 
   const { data: subscriptionStats } = useQuery({
     queryKey: ['subscription-stats'],
-    queryFn: () => subscriptionService.getSubscriptions(), // Using existing method instead of non-existent one
+    queryFn: () => subscriptionService.getSubscriptions(), 
   });
 
   const subscriptionPlans = subscriptionData?.plans || [];
