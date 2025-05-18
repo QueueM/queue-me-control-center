@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -32,6 +31,9 @@ const PaymentsPage = () => {
   const { data: paymentsData, isLoading, error } = useQuery({
     queryKey: ['payments'],
     queryFn: () => paymentService.getPayments(),
+    onSuccess: () => {
+      console.log('Payments data fetched successfully');
+    },
     onError: (err) => {
       toast({
         title: "Error fetching payments",

@@ -32,7 +32,10 @@ const ShopsPage = () => {
   const { data: shops, isLoading, error } = useQuery({
     queryKey: ['shops'],
     queryFn: () => shopService.getShops(),
-    onError: (err) => {
+    onSuccess: () => {
+      console.log('Shops data fetched successfully');
+    },
+    onError: () => {
       toast({
         title: "Error fetching shops",
         description: "There was a problem loading the shops data.",

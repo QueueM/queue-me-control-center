@@ -31,7 +31,10 @@ const UsersPage = () => {
   const { data: users, isLoading, error } = useQuery({
     queryKey: ['users'],
     queryFn: () => userService.getUsers(),
-    onError: (err) => {
+    onSuccess: () => {
+      console.log('Users data fetched successfully');
+    },
+    onError: () => {
       toast({
         title: "Error fetching users",
         description: "There was a problem loading the users data.",
@@ -107,7 +110,7 @@ const UsersPage = () => {
             <div className="space-y-4">
               <div>
                 <div className="flex items-center justify-between">
-                  <div className="text-2xl font-bold">{filteredUsers.length}</div>
+                  <div className="text-2xl font-bold">{users?.data?.length || 0}</div>
                   <UserRound className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <p className="text-xs text-muted-foreground">+12% from last month</p>

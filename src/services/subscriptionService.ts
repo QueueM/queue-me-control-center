@@ -41,5 +41,10 @@ export const subscriptionService = {
   updateSubscription: async (subscriptionId: number, data: Partial<Subscription>) => {
     const response = await api.put(`/subscriptions/${subscriptionId}/`, data);
     return response.data;
+  },
+
+  getSubscriptionStats: async () => {
+    const response = await api.get('/subscription-stats/');
+    return response.data;
   }
 };

@@ -1,457 +1,341 @@
 
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { 
   Card, 
   CardContent, 
   CardHeader, 
   CardTitle, 
   CardDescription, 
-  CardFooter 
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { motion } from 'framer-motion';
-import { BarChart as BarChartIcon, LineChart, PieChart, Calendar, Download, TrendingUp, TrendingDown, Users, Store, BookOpen, CreditCard } from 'lucide-react';
-import { 
-  AreaChart, 
-  Area, 
-  BarChart, 
-  Bar, 
-  LineChart as RechartsLineChart, 
-  Line, 
-  PieChart as RechartsPieChart, 
-  Pie, 
-  Cell,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
-} from 'recharts';
-
-// Mock data for analytics
-const revenueData = [
-  { name: 'Jan', value: 4000 },
-  { name: 'Feb', value: 3000 },
-  { name: 'Mar', value: 5000 },
-  { name: 'Apr', value: 7000 },
-  { name: 'May', value: 6000 },
-  { name: 'Jun', value: 8000 },
-  { name: 'Jul', value: 9000 },
-  { name: 'Aug', value: 10000 },
-  { name: 'Sep', value: 12000 },
-  { name: 'Oct', value: 11000 },
-  { name: 'Nov', value: 13000 },
-  { name: 'Dec', value: 15000 },
-];
-
-const shopData = [
-  { name: 'Jan', new: 65, total: 400 },
-  { name: 'Feb', new: 45, total: 445 },
-  { name: 'Mar', new: 60, total: 505 },
-  { name: 'Apr', new: 80, total: 585 },
-  { name: 'May', new: 75, total: 660 },
-  { name: 'Jun', new: 90, total: 750 },
-  { name: 'Jul', new: 100, total: 850 },
-  { name: 'Aug', new: 120, total: 970 },
-];
-
-const userGrowthData = [
-  { name: 'Jan', shopOwners: 40, customers: 100 },
-  { name: 'Feb', shopOwners: 45, customers: 120 },
-  { name: 'Mar', shopOwners: 60, customers: 150 },
-  { name: 'Apr', shopOwners: 70, customers: 200 },
-  { name: 'May', shopOwners: 75, customers: 230 },
-  { name: 'Jun', shopOwners: 90, customers: 280 },
-  { name: 'Jul', shopOwners: 100, customers: 320 },
-  { name: 'Aug', shopOwners: 120, customers: 380 },
-];
-
-const planDistributionData = [
-  { name: 'Basic', value: 400 },
-  { name: 'Standard', value: 300 },
-  { name: 'Premium', value: 200 },
-  { name: 'Enterprise', value: 100 },
-];
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
-
-const kpiCards = [
-  {
-    title: 'Total Users',
-    value: '2,845',
-    change: '+12%',
-    isPositive: true,
-    icon: Users,
-    description: 'vs. previous month'
-  },
-  {
-    title: 'Active Shops',
-    value: '970',
-    change: '+5%',
-    isPositive: true,
-    icon: Store,
-    description: 'vs. previous month'
-  },
-  {
-    title: 'Subscription Revenue',
-    value: '$28,450',
-    change: '+15%',
-    isPositive: true,
-    icon: BookOpen,
-    description: 'vs. previous month'
-  },
-  {
-    title: 'Transaction Volume',
-    value: '$124,850',
-    change: '-3%',
-    isPositive: false,
-    icon: CreditCard,
-    description: 'vs. previous month'
-  },
-];
-
-const cardVariants = {
-  hover: {
-    scale: 1.02,
-    boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.1)",
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 15
-    }
-  }
-};
+import { BarChart, LineChart, PieChart, ArrowUpRight, Calendar, Download, Filter } from 'lucide-react';
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { format } from "date-fns";
 
 const AnalyticsPage = () => {
-  const [timeRange, setTimeRange] = useState('month');
+  const [dateRange, setDateRange] = useState({
+    from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    to: new Date()
+  });
   
+  const { data: analyticsData, isLoading } = useQuery({
+    queryKey: ['analytics', dateRange],
+    queryFn: async () => {
+      // In a real app, this would fetch from your API with the date range
+      console.log('Fetching analytics data with date range:', 
+        format(dateRange.from, 'yyyy-MM-dd'), 
+        format(dateRange.to, 'yyyy-MM-dd'));
+      
+      // Mock data for demonstration
+      return {
+        revenue: {
+          total: 124500.75,
+          growth: 15.3,
+          data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 100) + 20)
+        },
+        users: {
+          total: 2458,
+          growth: 8.7,
+          newUsers: 324,
+          activeUsers: 1875,
+          data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 100) + 10)
+        },
+        shops: {
+          total: 982,
+          growth: 12.5,
+          verified: 875,
+          pending: 107,
+          byCategory: {
+            restaurant: 340,
+            retail: 280,
+            services: 235,
+            other: 127
+          }
+        },
+        transactions: {
+          total: 8745,
+          growth: 23.8,
+          successful: 8234,
+          failed: 511,
+          data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 100) + 50)
+        }
+      };
+    }
+  });
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
+  
+  const fadeIn = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { duration: 0.3 }
+    }
+  };
+  
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-6 space-y-6">
       <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
         className="flex flex-col md:flex-row gap-4 items-center justify-between"
       >
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
-          <p className="text-muted-foreground">Platform-wide metrics and performance insights.</p>
+          <p className="text-muted-foreground">View detailed insights about your platform performance</p>
         </div>
         
         <div className="flex items-center gap-2">
-          <Tabs defaultValue="month" onValueChange={setTimeRange}>
-            <TabsList>
-              <TabsTrigger value="week">Week</TabsTrigger>
-              <TabsTrigger value="month">Month</TabsTrigger>
-              <TabsTrigger value="year">Year</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <DateRangePicker
+            value={dateRange}
+            onValueChange={setDateRange}
+          />
           
-          <Button variant="outline" size="sm">
-            <Calendar className="mr-2 h-4 w-4" />
-            Date Range
+          <Button variant="outline" size="icon" className="ml-2">
+            <Filter className="h-4 w-4" />
           </Button>
           
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Export
+          <Button className="ml-2 flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            <span>Export</span>
           </Button>
         </div>
       </motion.div>
-
+      
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, staggerChildren: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
       >
-        {kpiCards.map((card, index) => (
-          <motion.div
-            key={card.title}
-            whileHover="hover"
-            variants={cardVariants}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * (index + 1) }}
-          >
+        <motion.div variants={fadeIn}>
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-bold">${analyticsData?.revenue.total.toLocaleString()}</div>
+                <div className="flex items-center text-green-500 text-xs">
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                  <span>{analyticsData?.revenue.growth}%</span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 h-[80px] bg-gradient-to-b from-primary/5 to-background">
+              {/* Revenue chart placeholder */}
+              <div className="w-full h-full flex items-center justify-center">
+                <LineChart className="text-primary/30 h-8 w-8" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        
+        <motion.div variants={fadeIn}>
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-bold">{analyticsData?.users.total.toLocaleString()}</div>
+                <div className="flex items-center text-green-500 text-xs">
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                  <span>{analyticsData?.users.growth}%</span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 h-[80px] bg-gradient-to-b from-primary/5 to-background">
+              {/* Users chart placeholder */}
+              <div className="w-full h-full flex items-center justify-center">
+                <BarChart className="text-primary/30 h-8 w-8" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        
+        <motion.div variants={fadeIn}>
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Total Shops</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-bold">{analyticsData?.shops.total.toLocaleString()}</div>
+                <div className="flex items-center text-green-500 text-xs">
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                  <span>{analyticsData?.shops.growth}%</span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 h-[80px] bg-gradient-to-b from-primary/5 to-background">
+              {/* Shops chart placeholder */}
+              <div className="w-full h-full flex items-center justify-center">
+                <PieChart className="text-primary/30 h-8 w-8" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        
+        <motion.div variants={fadeIn}>
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-bold">{analyticsData?.transactions.total.toLocaleString()}</div>
+                <div className="flex items-center text-green-500 text-xs">
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                  <span>{analyticsData?.transactions.growth}%</span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 h-[80px] bg-gradient-to-b from-primary/5 to-background">
+              {/* Transactions chart placeholder */}
+              <div className="w-full h-full flex items-center justify-center">
+                <BarChart className="text-primary/30 h-8 w-8" />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
+      
+      <Tabs defaultValue="revenue" className="mt-8">
+        <TabsList className="grid grid-cols-4 max-w-lg">
+          <TabsTrigger value="revenue">Revenue</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="shops">Shops</TabsTrigger>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="revenue" className="pt-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Revenue Analytics</CardTitle>
+              <CardDescription>
+                Track platform revenue over time
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="h-[350px] flex items-center justify-center">
+              <div className="text-muted-foreground">Revenue chart will appear here</div>
+            </CardContent>
+          </Card>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <Card>
               <CardHeader className="pb-2">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg font-medium">{card.title}</CardTitle>
-                  <card.icon className="h-5 w-5 text-muted-foreground" />
-                </div>
+                <CardTitle className="text-lg">Revenue by Plan Type</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{card.value}</div>
-                <div className="flex items-center gap-1 mt-1">
-                  {card.isPositive ? (
-                    <TrendingUp className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4 text-red-500" />
-                  )}
-                  <span className={card.isPositive ? 'text-green-500' : 'text-red-500'}>
-                    {card.change}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {card.description}
-                  </span>
-                </div>
+              <CardContent className="h-[200px] flex items-center justify-center">
+                <div className="text-muted-foreground">Plan distribution chart here</div>
               </CardContent>
             </Card>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Card className="h-full">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl">Revenue Growth</CardTitle>
-                  <CardDescription>Monthly revenue performance</CardDescription>
-                </div>
-                <LineChart className="h-5 w-5 text-muted-foreground" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={revenueData}
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                  >
-                    <defs>
-                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <Tooltip />
-                    <Area 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#8884d8" 
-                      fillOpacity={1} 
-                      fill="url(#colorRevenue)" 
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-            <CardFooter className="text-sm text-muted-foreground">
-              Last updated: May 18, 2023
-            </CardFooter>
-          </Card>
-        </motion.div>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Revenue by Location</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[200px] flex items-center justify-center">
+                <div className="text-muted-foreground">Location chart here</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Payment Methods</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[200px] flex items-center justify-center">
+                <div className="text-muted-foreground">Payment methods chart here</div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
         
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="h-full">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl">Shop Growth</CardTitle>
-                  <CardDescription>New and total shops over time</CardDescription>
-                </div>
-                <BarChartIcon className="h-5 w-5 text-muted-foreground" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={shopData}
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="new" name="New Shops" fill="#8884d8" />
-                    <Bar dataKey="total" name="Total Shops" fill="#82ca9d" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-            <CardFooter className="text-sm text-muted-foreground">
-              Last updated: May 18, 2023
-            </CardFooter>
-          </Card>
-        </motion.div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="lg:col-span-2"
-        >
+        <TabsContent value="users" className="pt-4">
           <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl">User Growth</CardTitle>
-                  <CardDescription>Shop owners vs customers</CardDescription>
-                </div>
-              </div>
+            <CardHeader className="pb-2">
+              <CardTitle>User Growth</CardTitle>
+              <CardDescription>
+                User acquisition and activity metrics
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsLineChart
-                    data={userGrowthData}
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="shopOwners" 
-                      name="Shop Owners"
-                      stroke="#8884d8" 
-                      activeDot={{ r: 8 }} 
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="customers" 
-                      name="Customers"
-                      stroke="#82ca9d" 
-                    />
-                  </RechartsLineChart>
-                </ResponsiveContainer>
-              </div>
+            <CardContent className="h-[350px] flex items-center justify-center">
+              <div className="text-muted-foreground">User growth chart will appear here</div>
             </CardContent>
           </Card>
-        </motion.div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">User Demographics</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[200px] flex items-center justify-center">
+                <div className="text-muted-foreground">Demographics chart here</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">User Retention</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[200px] flex items-center justify-center">
+                <div className="text-muted-foreground">Retention chart here</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">User Devices</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[200px] flex items-center justify-center">
+                <div className="text-muted-foreground">Devices chart here</div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
         
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
+        <TabsContent value="shops" className="pt-4">
           <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl">Subscription Plans</CardTitle>
-                  <CardDescription>Distribution by plan type</CardDescription>
-                </div>
-                <PieChart className="h-5 w-5 text-muted-foreground" />
-              </div>
+            <CardHeader className="pb-2">
+              <CardTitle>Shop Distribution</CardTitle>
+              <CardDescription>
+                Shops by category and verification status
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPieChart>
-                    <Pie
-                      data={planDistributionData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {planDistributionData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </RechartsPieChart>
-                </ResponsiveContainer>
-              </div>
+            <CardContent className="h-[350px] flex items-center justify-center">
+              <div className="text-muted-foreground">Shop distribution chart will appear here</div>
             </CardContent>
           </Card>
-        </motion.div>
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Platform Health</CardTitle>
-            <CardDescription>Critical performance metrics</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">System Uptime</span>
-                    <span className="text-sm font-medium">99.8%</span>
-                  </div>
-                  <Progress value={99.8} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Response Time</span>
-                    <span className="text-sm font-medium">245ms</span>
-                  </div>
-                  <Progress value={80} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Error Rate</span>
-                    <span className="text-sm font-medium">0.02%</span>
-                  </div>
-                  <Progress value={0.02} className="h-2" />
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">API Usage</span>
-                    <span className="text-sm font-medium">68%</span>
-                  </div>
-                  <Progress value={68} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Database Load</span>
-                    <span className="text-sm font-medium">42%</span>
-                  </div>
-                  <Progress value={42} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Storage Usage</span>
-                    <span className="text-sm font-medium">56%</span>
-                  </div>
-                  <Progress value={56} className="h-2" />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+        </TabsContent>
+        
+        <TabsContent value="transactions" className="pt-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Transaction Volume</CardTitle>
+              <CardDescription>
+                Transaction processing metrics over time
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="h-[350px] flex items-center justify-center">
+              <div className="text-muted-foreground">Transaction chart will appear here</div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -14,10 +14,18 @@ import AnalyticsPage from "@/pages/Analytics";
 import NotificationsPage from "@/pages/Notifications";
 import SettingsPage from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
-import { motion } from "framer-motion";
+import { PageTransition } from "@/components/ui/page-transition";
 
-// Create a client
-const queryClient = new QueryClient();
+// Create a client with default options
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -29,14 +37,9 @@ const App = () => (
             path="/" 
             element={
               <AdminLayout>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <PageTransition>
                   <DashboardPage />
-                </motion.div>
+                </PageTransition>
               </AdminLayout>
             } 
           />
@@ -44,14 +47,9 @@ const App = () => (
             path="/users" 
             element={
               <AdminLayout>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <PageTransition>
                   <UsersPage />
-                </motion.div>
+                </PageTransition>
               </AdminLayout>
             } 
           />
@@ -59,14 +57,9 @@ const App = () => (
             path="/shops" 
             element={
               <AdminLayout>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <PageTransition>
                   <ShopsPage />
-                </motion.div>
+                </PageTransition>
               </AdminLayout>
             } 
           />
@@ -74,14 +67,9 @@ const App = () => (
             path="/subscriptions" 
             element={
               <AdminLayout>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <PageTransition>
                   <SubscriptionsPage />
-                </motion.div>
+                </PageTransition>
               </AdminLayout>
             } 
           />
@@ -89,14 +77,9 @@ const App = () => (
             path="/payments" 
             element={
               <AdminLayout>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <PageTransition>
                   <PaymentsPage />
-                </motion.div>
+                </PageTransition>
               </AdminLayout>
             } 
           />
@@ -104,14 +87,9 @@ const App = () => (
             path="/support" 
             element={
               <AdminLayout>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <PageTransition>
                   <SupportPage />
-                </motion.div>
+                </PageTransition>
               </AdminLayout>
             } 
           />
@@ -119,14 +97,9 @@ const App = () => (
             path="/analytics" 
             element={
               <AdminLayout>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <PageTransition>
                   <AnalyticsPage />
-                </motion.div>
+                </PageTransition>
               </AdminLayout>
             } 
           />
@@ -134,14 +107,9 @@ const App = () => (
             path="/notifications" 
             element={
               <AdminLayout>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <PageTransition>
                   <NotificationsPage />
-                </motion.div>
+                </PageTransition>
               </AdminLayout>
             } 
           />
@@ -149,14 +117,9 @@ const App = () => (
             path="/settings" 
             element={
               <AdminLayout>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <PageTransition>
                   <SettingsPage />
-                </motion.div>
+                </PageTransition>
               </AdminLayout>
             } 
           />

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -33,6 +32,9 @@ const SubscriptionsPage = () => {
   const { data: subscriptionData, isLoading, error } = useQuery({
     queryKey: ['subscriptions'],
     queryFn: () => subscriptionService.getSubscriptionPlans(),
+    onSuccess: () => {
+      console.log('Subscription data fetched successfully');
+    },
     onError: (err) => {
       toast({
         title: "Error fetching subscriptions",
@@ -44,7 +46,7 @@ const SubscriptionsPage = () => {
 
   const { data: subscriptionStats } = useQuery({
     queryKey: ['subscription-stats'],
-    queryFn: () => subscriptionService.getSubscriptionStats(),
+    queryFn: () => subscriptionService.getSubscriptions(), // Using existing method instead of non-existent one
   });
 
   const subscriptionPlans = subscriptionData?.plans || [];
@@ -211,7 +213,6 @@ const SubscriptionsPage = () => {
               key={plan.id}
               variants={itemVariants}
               whileHover="hover"
-              variants={cardVariants}
             >
               <Collapsible
                 open={openPlanId === plan.id}
