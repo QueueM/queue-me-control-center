@@ -1,3 +1,4 @@
+
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import authService from './authService';
 import appConfig from '@/config/appConfig';
@@ -25,7 +26,7 @@ api.interceptors.request.use(
   (config: CustomAxiosRequestConfig): CustomAxiosRequestConfig => {
     const token = authService.getToken();
     if (token) {
-      config.headers = config.headers || {};
+      // Use proper typing for headers to avoid empty object assignment
       config.headers.Authorization = `Bearer ${token}`;
     }
     
