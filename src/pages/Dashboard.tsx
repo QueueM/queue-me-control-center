@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Card,
@@ -17,11 +17,9 @@ import {
   TrendingUp, 
   Calendar, 
   CheckCircle, 
-  XCircle,
   Clock,
   ArrowUp,
   ArrowDown,
-  Activity 
 } from "lucide-react";
 import { motion } from 'framer-motion';
 import {
@@ -40,30 +38,51 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import dashboardService from '@/services/dashboardService';
+import ActivityFeed from '@/components/dashboard/ActivityFeed';
+import { useFetch } from '@/hooks/useFetch';
+import { showApiError } from '@/services/errorService';
 
 const DashboardPage: React.FC = () => {
-  const [activeChart, setActiveChart] = useState("revenue");
+  const [activeChart, setActiveChart] = React.useState("revenue");
   
-  // Fetch dashboard data
-  const { data: dashboardData, isLoading: isDashboardLoading, error: dashboardError } = 
-    useQuery({
-      queryKey: ['dashboardOverview'],
-      queryFn: dashboardService.getOverview
-    });
+  // Fetch dashboard data with the enhanced useFetch hook
+  const { 
+    data: dashboardData, 
+    isLoading: isDashboardLoading 
+  } = useFetch(
+    ['dashboardOverview'], 
+    dashboardService.getOverview,
+    { 
+      showErrors: true,
+      errorMessage: "Failed to load dashboard overview"
+    }
+  );
     
   // Fetch statistics data
-  const { data: statisticsData, isLoading: isStatsLoading, error: statsError } =
-    useQuery({
-      queryKey: ['dashboardStatistics'],
-      queryFn: dashboardService.getStatistics
-    });
+  const { 
+    data: statisticsData,
+    isLoading: isStatsLoading
+  } = useFetch(
+    ['dashboardStatistics'], 
+    dashboardService.getStatistics,
+    {
+      showErrors: true,
+      errorMessage: "Failed to load statistics"
+    }
+  );
     
   // Fetch chart data based on active chart
-  const { data: chartData, isLoading: isChartLoading, error: chartError } =
-    useQuery({
-      queryKey: ['dashboardChart', activeChart],
-      queryFn: () => dashboardService.getCharts(activeChart)
-    });
+  const { 
+    data: chartData,
+    isLoading: isChartLoading
+  } = useFetch(
+    ['dashboardChart', activeChart], 
+    () => dashboardService.getCharts(activeChart),
+    {
+      showErrors: true,
+      errorMessage: "Failed to load chart data"
+    }
+  );
 
   // Animation variants
   const containerVariants = {
@@ -89,49 +108,23 @@ const DashboardPage: React.FC = () => {
   // Chart colors
   const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088fe'];
   
-  // Sample data for charts if real data is not available
-  const sampleRevenueData = [
-    { name: 'Jan', amount: 4000 },
-    { name: 'Feb', amount: 3000 },
-    { name: 'Mar', amount: 5000 },
-    { name: 'Apr', amount: 4500 },
-    { name: 'May', amount: 6000 },
-    { name: 'Jun', amount: 5500 },
-  ];
-  
-  const sampleBookingsData = [
-    { name: 'Mon', completed: 40, canceled: 5 },
-    { name: 'Tue', completed: 30, canceled: 8 },
-    { name: 'Wed', completed: 45, canceled: 10 },
-    { name: 'Thu', completed: 50, canceled: 12 },
-    { name: 'Fri', completed: 65, canceled: 15 },
-    { name: 'Sat', completed: 75, canceled: 20 },
-    { name: 'Sun', completed: 60, canceled: 18 },
-  ];
-  
-  const sampleServicesData = [
-    { name: 'Haircut', value: 400 },
-    { name: 'Massage', value: 300 },
-    { name: 'Nails', value: 300 },
-    { name: 'Facial', value: 200 },
-    { name: 'Makeup', value: 100 },
-  ];
-
   // Use real data if available, otherwise use sample data
-  const revenueData = chartData?.revenue || sampleRevenueData;
-  const bookingsData = chartData?.bookings || sampleBookingsData;
-  const servicesData = chartData?.services || sampleServicesData;
+  const revenueData = chartData?.revenue || [];
+  const bookingsData = chartData?.bookings || [];
+  const servicesData = chartData?.services || [];
   
   // Dashboard summary stats
   const stats = {
-    totalUsers: statisticsData?.users?.total || 5841,
-    activeShops: statisticsData?.shops?.active || 187,
-    totalRevenue: statisticsData?.payments?.total || '$286,458',
-    monthlySubscriptions: statisticsData?.subscriptions?.monthly || 156,
-    dailyAppointments: statisticsData?.appointments?.daily || 632,
-    completionRate: statisticsData?.appointments?.completionRate || 89,
-    averageWaitTime: statisticsData?.queues?.averageWaitTime || '12 mins',
+    totalUsers: statisticsData?.users?.total || 0,
+    activeShops: statisticsData?.shops?.active || 0,
+    totalRevenue: statisticsData?.payments?.total || 0,
+    monthlySubscriptions: statisticsData?.subscriptions?.monthly || 0,
+    dailyAppointments: statisticsData?.appointments?.daily || 0,
+    completionRate: statisticsData?.appointments?.completionRate || 0,
+    averageWaitTime: statisticsData?.queues?.averageWaitTime || 0,
   };
+
+  const isLoading = isDashboardLoading || isStatsLoading || isChartLoading;
 
   return (
     <motion.div
@@ -158,7 +151,7 @@ const DashboardPage: React.FC = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalUsers}</div>
+              <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
                 +20% from last month
               </p>
@@ -175,7 +168,7 @@ const DashboardPage: React.FC = () => {
               <Store className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.activeShops}</div>
+              <div className="text-2xl font-bold">{stats.activeShops.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
                 +12% from last month
               </p>
@@ -192,7 +185,7 @@ const DashboardPage: React.FC = () => {
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalRevenue}</div>
+              <div className="text-2xl font-bold">${stats.totalRevenue.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
                 +18% from last month
               </p>
@@ -209,7 +202,7 @@ const DashboardPage: React.FC = () => {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.monthlySubscriptions}</div>
+              <div className="text-2xl font-bold">{stats.monthlySubscriptions.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
                 +15% from last month
               </p>
@@ -229,7 +222,7 @@ const DashboardPage: React.FC = () => {
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.dailyAppointments}</div>
+              <div className="text-2xl font-bold">{stats.dailyAppointments.toLocaleString()}</div>
               <div className="flex items-center pt-1">
                 <ArrowUp className="h-3.5 w-3.5 mr-1 text-green-500" />
                 <span className="text-xs text-green-500">5% increase</span>
@@ -265,7 +258,7 @@ const DashboardPage: React.FC = () => {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.averageWaitTime}</div>
+              <div className="text-2xl font-bold">{stats.averageWaitTime} mins</div>
               <div className="flex items-center pt-1">
                 <ArrowDown className="h-3.5 w-3.5 mr-1 text-green-500" />
                 <span className="text-xs text-green-500">8% improvement</span>
@@ -294,56 +287,74 @@ const DashboardPage: React.FC = () => {
                 <TabsTrigger value="services">Services</TabsTrigger>
               </TabsList>
               <TabsContent value="revenue" className="pt-4">
-                <ResponsiveContainer width="100%" height={350}>
-                  <LineChart data={revenueData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="amount"
-                      stroke="#8884d8"
-                      activeDot={{ r: 8 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                {isLoading ? (
+                  <div className="h-[350px] flex items-center justify-center">
+                    <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={350}>
+                    <LineChart data={revenueData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="amount"
+                        stroke="#8884d8"
+                        activeDot={{ r: 8 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
               </TabsContent>
               <TabsContent value="bookings" className="pt-4">
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={bookingsData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="completed" fill="#8884d8" name="Completed" />
-                    <Bar dataKey="canceled" fill="#82ca9d" name="Canceled" />
-                  </BarChart>
-                </ResponsiveContainer>
+                {isLoading ? (
+                  <div className="h-[350px] flex items-center justify-center">
+                    <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={350}>
+                    <BarChart data={bookingsData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="completed" fill="#8884d8" name="Completed" />
+                      <Bar dataKey="canceled" fill="#82ca9d" name="Canceled" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </TabsContent>
               <TabsContent value="services" className="pt-4">
-                <ResponsiveContainer width="100%" height={350}>
-                  <PieChart>
-                    <Pie
-                      data={servicesData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {servicesData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                {isLoading ? (
+                  <div className="h-[350px] flex items-center justify-center">
+                    <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={350}>
+                    <PieChart>
+                      <Pie
+                        data={servicesData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {servicesData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
               </TabsContent>
             </Tabs>
           </CardHeader>
@@ -359,7 +370,7 @@ const DashboardPage: React.FC = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         {/* Recent Customers */}
         <motion.div variants={itemVariants} className="col-span-4">
-          <Card>
+          <Card className="h-full">
             <CardHeader>
               <CardTitle>Recent Signups</CardTitle>
               <CardDescription>
@@ -377,24 +388,34 @@ const DashboardPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Use real data here or sample data */}
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <tr key={i} className="border-b hover:bg-muted/50">
-                      <td className="p-3 flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Users className="h-4 w-4" />
-                        </div>
-                        <span>User {i}</span>
-                      </td>
-                      <td className="p-3">user{i}@example.com</td>
-                      <td className="p-3">{new Date().toLocaleDateString()}</td>
-                      <td className="p-3">
-                        <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
-                          Active
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {isLoading ? (
+                    Array(5).fill(0).map((_, i) => (
+                      <tr key={i} className="border-b">
+                        <td colSpan={4} className="p-3">
+                          <div className="h-8 bg-muted animate-pulse rounded-md"></div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    // Use real data or show sample users
+                    dashboardData?.recentUsers?.slice(0, 5).map((user: any, i: number) => (
+                      <tr key={i} className="border-b hover:bg-muted/50">
+                        <td className="p-3 flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Users className="h-4 w-4" />
+                          </div>
+                          <span>{user?.name || `User ${i + 1}`}</span>
+                        </td>
+                        <td className="p-3">{user?.email || `user${i + 1}@example.com`}</td>
+                        <td className="p-3">{user?.date || new Date().toLocaleDateString()}</td>
+                        <td className="p-3">
+                          <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
+                            {user?.status || 'Active'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
               <div className="p-4 text-center">
@@ -406,38 +427,7 @@ const DashboardPage: React.FC = () => {
 
         {/* Activity Feed */}
         <motion.div variants={itemVariants} className="col-span-3">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" /> Activity Log
-              </CardTitle>
-              <CardDescription>Recent system activities</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-5">
-                {[
-                  { icon: <Users className="h-4 w-4" />, text: "New user registered", time: "5 minutes ago" },
-                  { icon: <Store className="h-4 w-4" />, text: "Shop 'Beauty Salon' was created", time: "30 minutes ago" },
-                  { icon: <CreditCard className="h-4 w-4" />, text: "Payment of $250 was received", time: "1 hour ago" },
-                  { icon: <CheckCircle className="h-4 w-4" />, text: "Appointment #12345 was completed", time: "2 hours ago" },
-                  { icon: <XCircle className="h-4 w-4" />, text: "Subscription was cancelled", time: "3 hours ago" },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start space-x-3">
-                    <div className="rounded-full bg-primary/10 p-2 flex-none">
-                      {item.icon}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{item.text}</p>
-                      <p className="text-xs text-muted-foreground">{item.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 text-center">
-                <Button variant="outline" className="w-full">View All Activity</Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ActivityFeed height={400} maxItems={5} autoRefresh={true} />
         </motion.div>
       </div>
     </motion.div>

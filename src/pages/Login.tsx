@@ -1,43 +1,35 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { motion } from 'framer-motion';
-import authService from '@/services/authService';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import PhoneLoginForm from '@/components/auth/PhoneLoginForm';
+import { AlertCircle } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const { login, isLoading, error } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    setIsLoading(true);
-    try {
-      await authService.login({ username, password });
+    if (!username || !password) {
       toast({
-        title: 'Login Successful',
-        description: 'Welcome to the QueueMe Admin Panel',
-      });
-      navigate('/');
-    } catch (error) {
-      toast({
-        title: 'Login Failed',
-        description: 'Invalid username or password',
+        title: 'Error',
+        description: 'Please enter both username and password',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
+      return;
     }
+    
+    await login(username, password);
   };
 
   // Animation variants
@@ -89,6 +81,12 @@ const LoginPage: React.FC = () => {
                   onSubmit={handleLogin} 
                   className="space-y-4"
                 >
+                  {error && (
+                    <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center space-x-2">
+                      <AlertCircle className="h-4 w-4" />
+                      <p>{error}</p>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Input
                       id="username"
@@ -96,6 +94,8 @@ const LoginPage: React.FC = () => {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required
+                      autoComplete="username"
+                      disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
@@ -106,6 +106,8 @@ const LoginPage: React.FC = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      autoComplete="current-password"
+                      disabled={isLoading}
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>

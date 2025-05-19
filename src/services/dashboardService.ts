@@ -1,41 +1,27 @@
 
-import api from './api';
+import apiService from './api';
+import { createService } from './mockedServiceWrapper';
 
-const dashboardService = {
+// Real API implementation
+const realDashboardService = {
   getOverview: async () => {
-    const response = await api.get('/api/dashboard/');
-    return response.data;
+    return await apiService.get('/api/dashboard/overview');
   },
   
   getStatistics: async () => {
-    const response = await api.get('/api/dashboard/statistics/');
-    return response.data;
+    return await apiService.get('/api/dashboard/statistics');
   },
   
   getCharts: async (type: string) => {
-    const response = await api.get(`/api/dashboard/charts/${type}/`);
-    return response.data;
+    return await apiService.get(`/api/dashboard/charts/${type}`);
   },
   
-  getPerformance: async () => {
-    const response = await api.get('/api/dashboard/performance/');
-    return response.data;
-  },
-  
-  getCalendar: async () => {
-    const response = await api.get('/api/dashboard/calendar/');
-    return response.data;
-  },
-  
-  getTasks: async () => {
-    const response = await api.get('/api/dashboard/tasks/');
-    return response.data;
-  },
-  
-  createTask: async (task: any) => {
-    const response = await api.post('/api/dashboard/tasks/', task);
-    return response.data;
+  getActivities: async () => {
+    return await apiService.get('/api/dashboard/activities');
   }
 };
+
+// Create service that can switch between real and mock implementation
+const dashboardService = createService(realDashboardService, 'dashboard');
 
 export default dashboardService;
