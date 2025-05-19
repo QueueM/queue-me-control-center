@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -23,11 +22,11 @@ import { motion } from 'framer-motion';
 import { CheckCircle, PlusCircle, Search, Store, XCircle } from 'lucide-react';
 import { ShopsFilter } from '@/components/shops/ShopsFilter';
 import { ShopModal } from '@/components/shops/ShopModal';
-import { useMediaQuery } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { CreateShopDto } from '@/services/shopService';
 
 const ShopsPage = () => {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
