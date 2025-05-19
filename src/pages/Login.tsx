@@ -1,130 +1,152 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { motion } from 'framer-motion';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import PhoneLoginForm from '@/components/auth/PhoneLoginForm';
-import { AlertCircle } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
-  const { toast } = useToast();
-  const { login, isLoading, error } = useAuth();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
+    
+    if (!email || !password) {
       toast({
-        title: 'Error',
-        description: 'Please enter both username and password',
-        variant: 'destructive',
+        title: "Missing Fields",
+        description: "Please enter both email and password",
+        variant: "destructive",
       });
       return;
     }
     
-    await login(username, password);
-  };
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        duration: 0.5,
-        staggerChildren: 0.1
+    setIsLoading(true);
+    
+    // Simulate API call
+    try {
+      // For demo, use admin@example.com and password
+      if (email === 'admin@example.com' && password === 'password') {
+        // Successful login
+        toast({
+          title: "Login Successful",
+          description: "Welcome to QueueMe Admin Panel",
+        });
+        
+        // Wait a moment to show the toast
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1000);
+      } else {
+        // Failed login
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password",
+          variant: "destructive",
+        });
+        setIsLoading(false);
       }
+    } catch (error) {
+      toast({
+        title: "Login Error",
+        description: "An error occurred during login",
+        variant: "destructive",
+      });
+      setIsLoading(false);
     }
   };
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-accent/10 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background/95 backdrop-blur-sm p-4">
       <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <Card className="border-accent/20 shadow-lg">
-          <CardHeader className="space-y-1 text-center">
-            <motion.div variants={itemVariants}>
-              <img src="/logo.svg" alt="QueueMe Logo" className="h-12 mx-auto mb-4" />
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <CardTitle className="text-2xl font-semibold">Admin Login</CardTitle>
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <CardDescription>Enter your credentials to access the admin panel</CardDescription>
-            </motion.div>
+        <div className="text-center mb-6">
+          <div className="flex justify-center mb-4">
+            <img src="/logo.svg" alt="QueueMe Logo" className="h-12" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">Welcome to QueueMe</h1>
+          <p className="text-muted-foreground mt-2">Admin Panel Login</p>
+        </div>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Login</CardTitle>
+            <CardDescription>Enter your credentials to access the admin panel</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="credentials">
-              <TabsList className="grid grid-cols-2 mb-4">
-                <TabsTrigger value="credentials">Credentials</TabsTrigger>
-                <TabsTrigger value="phone">Phone</TabsTrigger>
-              </TabsList>
-              <TabsContent value="credentials">
-                <motion.form 
-                  variants={itemVariants} 
-                  onSubmit={handleLogin} 
-                  className="space-y-4"
-                >
-                  {error && (
-                    <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center space-x-2">
-                      <AlertCircle className="h-4 w-4" />
-                      <p>{error}</p>
-                    </div>
-                  )}
-                  <div className="space-y-2">
-                    <Input
-                      id="username"
-                      placeholder="Username or Email"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                      autoComplete="username"
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      autoComplete="current-password"
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Logging in...' : 'Login'}
-                  </Button>
-                </motion.form>
-              </TabsContent>
-              <TabsContent value="phone">
-                <PhoneLoginForm />
-              </TabsContent>
-            </Tabs>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="admin@example.com" 
+                    className="pl-10"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    id="password" 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••" 
+                    className="pl-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button 
+                    type="button"
+                    onClick={toggleShowPassword}
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                    <span className="sr-only">
+                      {showPassword ? "Hide password" : "Show password"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+              
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Log in"}
+              </Button>
+            </form>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-2 text-center text-sm text-muted-foreground">
-            <motion.div variants={itemVariants}>
-              <p>Protected access for QueueMe administrators.</p>
-              <p>© 2025 QueueMe. All rights reserved.</p>
-            </motion.div>
+          <CardFooter className="flex flex-col">
+            <div className="text-sm text-center text-muted-foreground mt-2">
+              <p>Demo credentials:</p>
+              <p>Email: admin@example.com</p>
+              <p>Password: password</p>
+            </div>
           </CardFooter>
         </Card>
       </motion.div>

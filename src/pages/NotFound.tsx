@@ -1,27 +1,72 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
 
-const NotFound = () => {
-  const location = useLocation();
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Home, ArrowLeft } from 'lucide-react';
 
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
-
+const NotFoundPage: React.FC = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
-      </div>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="text-center max-w-md"
+      >
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 260, 
+            damping: 20,
+            delay: 0.2 
+          }}
+          className="flex justify-center mb-6"
+        >
+          <div className="h-24 w-24 rounded-full bg-yellow-100 flex items-center justify-center">
+            <AlertTriangle className="h-12 w-12 text-yellow-500" />
+          </div>
+        </motion.div>
+
+        <h1 className="text-4xl font-bold tracking-tight mb-2">Page Not Found</h1>
+        <p className="text-muted-foreground mb-8">
+          Oops! The page you're looking for doesn't exist or has been moved.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button asChild variant="outline">
+              <Link to="/" className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                <span>Go Back</span>
+              </Link>
+            </Button>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button asChild>
+              <Link to="/dashboard" className="flex items-center gap-2">
+                <Home className="h-4 w-4" />
+                <span>Back to Dashboard</span>
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+
+        <div className="mt-12 text-sm text-muted-foreground">
+          <p>If you think this is an error, please contact support.</p>
+        </div>
+      </motion.div>
     </div>
   );
 };
 
-export default NotFound;
+export default NotFoundPage;
