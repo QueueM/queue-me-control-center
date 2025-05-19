@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -20,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { motion } from 'framer-motion';
 import { CreditCard, Search, ArrowUpDown, ArrowDownUp, ExternalLink, Download, Calendar } from 'lucide-react';
-import { paymentService } from '@/services/paymentService';
+import paymentService from '@/services/paymentService';
 import { useToast } from '@/hooks/use-toast';
 
 const PaymentsPage = () => {

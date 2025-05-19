@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -21,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Search, Plus, ArrowUpDown, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { subscriptionService } from "@/services/subscriptionService";
+import subscriptionService from "@/services/subscriptionService";
 import { useToast } from '@/hooks/use-toast';
 
 const SubscriptionsPage = () => {
