@@ -21,6 +21,11 @@ import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
 import Support from './pages/Support';
+import Index from './pages/Index';
+import Companies from './pages/Companies';
+import Appointments from './pages/Appointments';
+import Reports from './pages/Reports';
+import Services from './pages/Services';
 
 // Enable mockApi globally (for development)
 import { useMockApi } from './services/mockApiService';
@@ -51,14 +56,18 @@ function App() {
               <Route path="/login" element={<Login />} />
               
               <Route path="/" element={<AdminLayout />}>
-                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route index element={<Index />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="users" element={<Users />} />
                 <Route path="shops" element={<Shops />} />
                 <Route path="shops/:shopId" element={<ShopDetails />} />
+                <Route path="companies" element={<Companies />} />
+                <Route path="appointments" element={<Appointments />} />
                 <Route path="payments" element={<Payments />} />
                 <Route path="subscriptions" element={<Subscriptions />} />
                 <Route path="analytics" element={<Analytics />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="services" element={<Services />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="notifications" element={<Notifications />} />
                 <Route path="support" element={<Support />} />
