@@ -1,8 +1,15 @@
-
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import authService from './authService';
 import appConfig from '@/config/appConfig';
 import { handleApiError } from './errorService';
+
+// Extend the InternalAxiosRequestConfig to include our custom metadata
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  metadata?: {
+    requestStartTime?: number;
+    [key: string]: any;
+  };
+}
 
 // Create axios instance with configuration
 const api: AxiosInstance = axios.create({
@@ -15,7 +22,7 @@ const api: AxiosInstance = axios.create({
 
 // Request interceptor for API calls
 api.interceptors.request.use(
-  (config): AxiosRequestConfig => {
+  (config: CustomAxiosRequestConfig): CustomAxiosRequestConfig => {
     const token = authService.getToken();
     if (token) {
       config.headers = config.headers || {};
@@ -38,10 +45,10 @@ api.interceptors.request.use(
 // Response interceptor for API calls
 api.interceptors.response.use(
   (response: AxiosResponse): AxiosResponse => {
-    const config = response.config;
+    const config = response.config as CustomAxiosRequestConfig;
     
     // Calculate request duration for performance monitoring
-    if (config.metadata) {
+    if (config.metadata && config.metadata.requestStartTime) {
       const requestStartTime = config.metadata.requestStartTime;
       const requestEndTime = Date.now();
       const duration = requestEndTime - requestStartTime;
