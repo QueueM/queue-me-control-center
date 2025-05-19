@@ -1,276 +1,73 @@
 
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/toaster";
-import AdminLayout from "@/components/layouts/AdminLayout";
-import DashboardPage from "@/pages/Dashboard";
-import UsersPage from "@/pages/Users";
-import ShopsPage from "@/pages/Shops";
-import SubscriptionsPage from "@/pages/Subscriptions";
-import PaymentsPage from "@/pages/Payments";
-import SupportPage from "@/pages/Support";
-import AnalyticsPage from "@/pages/Analytics";
-import NotificationsPage from "@/pages/Notifications";
-import SettingsPage from "@/pages/Settings";
-import LoginPage from "@/pages/Login";
-import NotFound from "@/pages/NotFound";
-import { PageTransition } from "@/components/ui/page-transition";
-import { AppProvider, useAppContext } from "@/contexts/AppContext";
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
-import auditService from "@/services/auditService";
-import appConfig from "@/config/appConfig";
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
-// Create a client with improved options
+// Layouts
+import AdminLayout from './components/layouts/AdminLayout';
+
+// Pages
+import Login from './pages/Login';
+import NotFound from './pages/NotFound';
+import Dashboard from './pages/Dashboard';
+import Users from './pages/Users';
+import Shops from './pages/Shops';
+import ShopDetails from './components/shops/ShopDetails';
+import Payments from './pages/Payments';
+import Subscriptions from './pages/Subscriptions';
+import Analytics from './pages/Analytics';
+import Settings from './pages/Settings';
+import Notifications from './pages/Notifications';
+import Support from './pages/Support';
+
+// Enable mockApi globally (for development)
+import { useMockApi } from './services/mockApiService';
+
+import './App.css';
+
+// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
       refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
     },
   },
 });
 
-// Protected route component that uses AppContext
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { state: { isAuthenticated, isLoading } } = useAppContext();
-  const location = useLocation();
-
-  // Log page views for analytics
-  useEffect(() => {
-    if (isAuthenticated) {
-      auditService.logView('page', location.pathname);
-    }
-  }, [location.pathname, isAuthenticated]);
-
-  // Security timeout - log out after inactivity
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    
-    let inactivityTimer: number | null = null;
-    
-    const resetTimer = () => {
-      if (inactivityTimer) window.clearTimeout(inactivityTimer);
-      
-      inactivityTimer = window.setTimeout(() => {
-        // Auto-logout after session timeout from config
-        const { logout } = require('@/services/authService').default;
-        logout();
-        alert('Your session has expired due to inactivity. Please login again.');
-      }, appConfig.security.sessionTimeout * 60 * 1000);
-    };
-    
-    // Events that reset the timer
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
-    events.forEach(event => {
-      document.addEventListener(event, resetTimer);
-    });
-    
-    // Initialize timer
-    resetTimer();
-    
-    // Cleanup
-    return () => {
-      if (inactivityTimer) window.clearTimeout(inactivityTimer);
-      events.forEach(event => {
-        document.removeEventListener(event, resetTimer);
-      });
-    };
-  }, [isAuthenticated]);
-
-  // Show loading while checking auth
-  if (isLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"
-        />
-      </div>
-    );
+function App() {
+  if (useMockApi) {
+    console.log('🧪 Mock API is enabled');
   }
-
-  // Use Navigate component for proper React Router navigation
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
-
-// Public route (for login page)
-const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { state: { isAuthenticated, isLoading } } = useAppContext();
-  
-  if (isLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"
-        />
-      </div>
-    );
-  }
-  
-  return isAuthenticated ? <Navigate to="/" replace /> : children;
-};
-
-// Main App component
-const App = () => {
-  // Clean up audit service on app unmount
-  useEffect(() => {
-    return () => {
-      auditService.cleanup();
-    };
-  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AppProvider>
-          <Toaster />
-          <BrowserRouter>
-            <AnimatePresence mode="wait">
-              <Routes>
-                <Route 
-                  path="/login" 
-                  element={
-                    <PublicRoute>
-                      <LoginPage />
-                    </PublicRoute>
-                  } 
-                />
-                
-                {/* Protected Routes */}
-                <Route 
-                  path="/" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout>
-                        <PageTransition>
-                          <DashboardPage />
-                        </PageTransition>
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/users" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout>
-                        <PageTransition>
-                          <UsersPage />
-                        </PageTransition>
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/shops" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout>
-                        <PageTransition>
-                          <ShopsPage />
-                        </PageTransition>
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/subscriptions" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout>
-                        <PageTransition>
-                          <SubscriptionsPage />
-                        </PageTransition>
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/payments" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout>
-                        <PageTransition>
-                          <PaymentsPage />
-                        </PageTransition>
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/support" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout>
-                        <PageTransition>
-                          <SupportPage />
-                        </PageTransition>
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/analytics" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout>
-                        <PageTransition>
-                          <AnalyticsPage />
-                        </PageTransition>
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/notifications" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout>
-                        <PageTransition>
-                          <NotificationsPage />
-                        </PageTransition>
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route 
-                  path="/settings" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminLayout>
-                        <PageTransition>
-                          <SettingsPage />
-                        </PageTransition>
-                      </AdminLayout>
-                    </ProtectedRoute>
-                  } 
-                />
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </AnimatePresence>
-          </BrowserRouter>
-        </AppProvider>
-      </TooltipProvider>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            
+            <Route path="/" element={<AdminLayout />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="users" element={<Users />} />
+              <Route path="shops" element={<Shops />} />
+              <Route path="shops/:shopId" element={<ShopDetails />} />
+              <Route path="payments" element={<Payments />} />
+              <Route path="subscriptions" element={<Subscriptions />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="support" element={<Support />} />
+            </Route>
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </ErrorBoundary>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;

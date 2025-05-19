@@ -1,5 +1,6 @@
 
 import { faker } from '@faker-js/faker';
+import { ShopFilters } from '@/services/shopService';
 
 // Generate 50 shops
 const generateShops = (count = 50) => {
@@ -42,7 +43,7 @@ const shops = generateShops();
 const categories = generateCategories();
 
 export const shopsMockApi = {
-  getShops: (page = 1, limit = 10, filters = {}) => {
+  getShops: (page = 1, limit = 10, filters: ShopFilters = {}) => {
     let filteredShops = [...shops];
     
     // Apply filters
