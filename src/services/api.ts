@@ -1,37 +1,56 @@
 
 import axios from 'axios';
+import authService from './authService';
 
-// Create axios instance with base configurations
+// Create axios instance
 const api = axios.create({
-  baseURL: 'https://api.queueme.net', // Use your actual API endpoint
-  timeout: 10000,
+  baseURL: 'https://api.queueme.net',
   headers: {
     'Content-Type': 'application/json',
-  }
+  },
 });
 
-// Request interceptor for adding auth token
+// Request interceptor for API calls
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = authService.getToken();
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
-// Response interceptor for handling common errors
+// Response interceptor for API calls
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    const { response } = error;
+  async (error) => {
+    const originalRequest = error.config;
     
-    if (response && response.status === 401) {
-      // Handle unauthorized - redirect to login
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    // If the error is 401 and we haven't already tried to refresh the token
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Attempt to refresh the token
+        await authService.refreshToken();
+        
+        // Update the Authorization header
+        const token = authService.getToken();
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        originalRequest.headers['Authorization'] = `Bearer ${token}`;
+        
+        // Retry the original request
+        return api(originalRequest);
+      } catch (refreshError) {
+        // If refresh fails, redirect to login
+        authService.logout();
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
     }
     
     return Promise.reject(error);

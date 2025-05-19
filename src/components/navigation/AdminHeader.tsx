@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Bell, Mail, LogOut, Settings, User, HelpCircle, Search } from 'lucide-react';
+import { Bell, Mail, LogOut, Settings, User, HelpCircle, Search, MoonIcon, SunIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -25,18 +25,24 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { motion } from 'framer-motion';
+import { useAppContext } from '@/contexts/AppContext';
 
 interface AdminHeaderProps {
+  toggleTheme: () => void;
+  isDarkMode: boolean;
   children?: React.ReactNode;
 }
 
-const AdminHeader: React.FC<AdminHeaderProps> = ({ children }) => {
+const AdminHeader: React.FC<AdminHeaderProps> = ({ toggleTheme, isDarkMode, children }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { logout, state } = useAppContext();
+  const { user } = state;
   const [showSearch, setShowSearch] = useState(false);
   
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    logout();
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out."
@@ -44,11 +50,28 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ children }) => {
     navigate('/login');
   };
   
+  const buttonVariants = {
+    hover: { scale: 1.05 },
+    tap: { scale: 0.95 }
+  };
+  
   return (
-    <header className="h-16 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-30 flex items-center px-4 md:px-6">
+    <motion.header 
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="h-16 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-30 flex items-center px-4 md:px-6"
+    >
       <SidebarTrigger />
       
-      <h1 className="text-xl font-semibold ml-4 hidden md:block">QueueMe Admin</h1>
+      <motion.h1 
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+        className="text-xl font-semibold ml-4 hidden md:block"
+      >
+        QueueMe Admin
+      </motion.h1>
       
       {showSearch ? (
         <div className="flex-1 px-4">
@@ -74,7 +97,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ children }) => {
       <div className="ml-auto flex items-center gap-4">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative md:hidden" onClick={() => setShowSearch(true)}>
+            <Button variant="ghost" size="icon" className="relative md:hidden">
               <Search className="h-5 w-5" />
             </Button>
           </SheetTrigger>
@@ -98,10 +121,12 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ children }) => {
       
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Mail className="h-5 w-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center">3</Badge>
-            </Button>
+            <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+              <Button variant="ghost" size="icon" className="relative">
+                <Mail className="h-5 w-5" />
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center">3</Badge>
+              </Button>
+            </motion.div>
           </SheetTrigger>
           <SheetContent>
             <SheetHeader>
@@ -112,7 +137,13 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ children }) => {
             </SheetHeader>
             <div className="mt-4 space-y-2">
               {[1, 2, 3].map(i => (
-                <div key={i} className="flex items-start gap-3 p-3 hover:bg-accent rounded-lg cursor-pointer">
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-start gap-3 p-3 hover:bg-accent rounded-lg cursor-pointer"
+                >
                   <Avatar className="h-9 w-9">
                     <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=user-${i}`} alt="User" />
                     <AvatarFallback>U{i}</AvatarFallback>
@@ -126,7 +157,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ children }) => {
                       {i} hour{i > 1 ? 's' : ''} ago
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </SheetContent>
@@ -134,10 +165,12 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ children }) => {
         
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center">5</Badge>
-            </Button>
+            <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center">5</Badge>
+              </Button>
+            </motion.div>
           </SheetTrigger>
           <SheetContent>
             <SheetHeader>
@@ -148,7 +181,13 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ children }) => {
             </SheetHeader>
             <div className="mt-4 space-y-2">
               {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="p-3 hover:bg-accent rounded-lg cursor-pointer">
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="p-3 hover:bg-accent rounded-lg cursor-pointer"
+                >
                   <div className="font-medium">System Alert</div>
                   <div className="text-sm text-muted-foreground">
                     New user registered on the platform
@@ -156,18 +195,26 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ children }) => {
                   <div className="text-xs text-muted-foreground mt-1">
                     {i * 10} minutes ago
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </SheetContent>
         </Sheet>
+        
+        <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
+          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+            {isDarkMode ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
+          </Button>
+        </motion.div>
         
         {children}
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <div className="flex items-center gap-2 cursor-pointer">
-              <span className="text-sm font-medium hidden md:inline">Admin User</span>
+              <span className="text-sm font-medium hidden md:inline">
+                {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : 'Admin User'}
+              </span>
               <Avatar className="h-8 w-8 border">
                 <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" />
                 <AvatarFallback>A</AvatarFallback>
@@ -199,7 +246,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ children }) => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </header>
+    </motion.header>
   );
 };
 

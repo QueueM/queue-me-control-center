@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
-import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarTrigger } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { MoonIcon, SunIcon } from "lucide-react";
-import { Toaster } from "@/components/ui/toaster";
+import React from 'react';
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { useToast } from '@/hooks/use-toast';
+import { useAppContext } from '@/contexts/AppContext';
+import { motion } from 'framer-motion';
 import AdminSidebar from '@/components/navigation/AdminSidebar';
 import AdminHeader from '@/components/navigation/AdminHeader';
 
@@ -12,28 +12,29 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
+  const { state, setTheme } = useAppContext();
+  const { theme, sidebarCollapsed } = state;
+  
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle('dark');
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
   };
-
+  
   return (
-    <SidebarProvider>
-      <div className={`min-h-screen flex w-full ${isDarkMode ? 'dark' : ''}`}>
+    <SidebarProvider defaultOpen={!sidebarCollapsed}>
+      <div className={`min-h-screen flex w-full bg-background/95 backdrop-blur-sm ${theme === 'dark' ? 'dark' : ''}`}>
         <AdminSidebar />
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <AdminHeader>
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="ml-auto">
-              {isDarkMode ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
-            </Button>
-          </AdminHeader>
-          <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <motion.div 
+          className="flex flex-col flex-1 overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <AdminHeader toggleTheme={toggleTheme} isDarkMode={theme === 'dark'} />
+          <main className="flex-1 overflow-y-auto p-4 md:p-6 transition-all">
             {children}
           </main>
-        </div>
-        <Toaster />
+        </motion.div>
       </div>
     </SidebarProvider>
   );
