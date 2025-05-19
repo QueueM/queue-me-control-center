@@ -32,7 +32,7 @@ const SubscriptionsPage = () => {
   
   const { data: subscriptionData, isLoading, error } = useQuery({
     queryKey: ['subscriptions'],
-    queryFn: () => subscriptionService.getSubscriptionPlans(),
+    queryFn: () => subscriptionService.getPlans(),
     meta: {
       onError: (err: Error) => {
         toast({
