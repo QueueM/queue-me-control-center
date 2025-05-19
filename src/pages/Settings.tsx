@@ -1,99 +1,125 @@
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from '@/hooks/use-toast';
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from 'framer-motion';
+import { useToast } from "@/hooks/use-toast";
 import { 
   Settings as SettingsIcon, 
-  User, 
-  Bell, 
   Lock, 
-  Shield, 
-  CreditCard, 
+  Bell, 
+  Palette, 
   Globe, 
-  Paintbrush, 
-  MailCheck,
+  Shield, 
   Save,
-  Plus,
-  MessageSquare,
-  Mail
+  User,
+  Mail,
+  Phone,
+  Building 
 } from 'lucide-react';
+import { useAppContext } from '@/contexts/AppContext';
 
-const SettingsPage: React.FC = () => {
+const SettingsPage = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('general');
-  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
+  const { state, setTheme } = useAppContext();
   
-  // General settings
-  const [companyName, setCompanyName] = useState('QueueMe Inc.');
-  const [supportEmail, setSupportEmail] = useState('support@queueme.com');
-  const [primaryColor, setPrimaryColor] = useState('#8b5cf6');
-  const [language, setLanguage] = useState('en');
-  const [timezone, setTimezone] = useState('UTC');
+  // Profile settings
+  const [profileForm, setProfileForm] = useState({
+    name: "Admin User",
+    email: "admin@example.com",
+    phone: "+1 (555) 123-4567",
+    company: "QueueMe Admin"
+  });
   
-  // Email settings
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [weeklyDigest, setWeeklyDigest] = useState(true);
-  const [systemAlerts, setSystemAlerts] = useState(true);
-  const [marketingEmails, setMarketingEmails] = useState(false);
+  // Notification settings
+  const [notificationSettings, setNotificationSettings] = useState({
+    emailNotifications: true,
+    smsNotifications: false,
+    pushNotifications: true,
+    marketingEmails: false
+  });
+  
+  // Appearance settings
+  const [darkMode, setDarkMode] = useState(state.theme === 'dark');
   
   // Security settings
-  const [requireMFA, setRequireMFA] = useState(false);
-  const [sessionTimeout, setSessionTimeout] = useState('60');
-  const [passwordRotation, setPasswordRotation] = useState('90');
-  const [minPasswordLength, setMinPasswordLength] = useState('8');
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
   
-  // API & Integrations
-  const [apiKey] = useState('sk_live_XXXXXXXXXXXXXXXXXXXX');
-  const [webhookUrl, setWebhookUrl] = useState('https://yourdomain.com/webhook');
-  
-  const resetSettings = () => {
+  const handleProfileSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     toast({
-      title: "Settings reset",
-      description: "All settings have been reset to default values."
+      title: "Profile Updated",
+      description: "Your profile information has been saved successfully."
     });
   };
   
-  const saveSettings = () => {
-    setIsFormSubmitting(true);
+  const handleNotificationChange = (key: string, value: boolean) => {
+    setNotificationSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsFormSubmitting(false);
-      toast({
-        title: "Settings saved",
-        description: "Your changes have been saved successfully."
-      });
-    }, 1000);
-  };
-
-  const copyApiKey = () => {
-    navigator.clipboard.writeText(apiKey);
     toast({
-      title: "API key copied",
-      description: "The API key has been copied to your clipboard."
+      title: "Notification Settings Updated",
+      description: `${key} has been ${value ? 'enabled' : 'disabled'}.`
     });
   };
   
-  const regenerateApiKey = () => {
+  const handleThemeChange = (checked: boolean) => {
+    setDarkMode(checked);
+    const newTheme = checked ? 'dark' : 'light';
+    setTheme(newTheme);
+    
     toast({
-      title: "API key regenerated",
-      description: "A new API key has been generated. Make sure to update your integrations."
+      title: "Theme Updated",
+      description: `Theme has been changed to ${newTheme} mode.`
+    });
+  };
+  
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast({
+        title: "Password Error",
+        description: "New passwords do not match. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (passwordForm.newPassword.length < 8) {
+      toast({
+        title: "Password Error",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    toast({
+      title: "Password Updated",
+      description: "Your password has been changed successfully."
+    });
+    
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: ""
     });
   };
   
@@ -106,11 +132,11 @@ const SettingsPage: React.FC = () => {
       }
     }
   };
-
+  
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: {
         type: "spring",
@@ -129,488 +155,274 @@ const SettingsPage: React.FC = () => {
       >
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-          <p className="text-muted-foreground">Manage application settings and preferences</p>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={resetSettings}>Reset</Button>
-          <Button 
-            className="flex items-center gap-2" 
-            onClick={saveSettings} 
-            disabled={isFormSubmitting}
-          >
-            {isFormSubmitting ? (
-              <>
-                <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                <Save size={18} />
-                <span>Save Changes</span>
-              </>
-            )}
-          </Button>
+          <p className="text-muted-foreground">Manage your account preferences and settings</p>
         </div>
       </motion.div>
 
-      <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:w-[600px]">
-          <TabsTrigger value="general">
-            <SettingsIcon className="h-4 w-4 mr-2" />
-            General
-          </TabsTrigger>
-          <TabsTrigger value="email">
-            <Bell className="h-4 w-4 mr-2" />
-            Notifications
-          </TabsTrigger>
-          <TabsTrigger value="security">
-            <Shield className="h-4 w-4 mr-2" />
-            Security
-          </TabsTrigger>
-          <TabsTrigger value="api">
-            <Globe className="h-4 w-4 mr-2" />
-            API & Integrations
-          </TabsTrigger>
-        </TabsList>
-        
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="mt-6"
-        >
-          <TabsContent value="general" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>General Settings</CardTitle>
-                <CardDescription>
-                  Manage your application's general settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="companyName">Company Name</Label>
-                    <Input 
-                      id="companyName" 
-                      value={companyName} 
-                      onChange={(e) => setCompanyName(e.target.value)} 
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="supportEmail">Support Email</Label>
-                    <Input 
-                      id="supportEmail" 
-                      type="email" 
-                      value={supportEmail} 
-                      onChange={(e) => setSupportEmail(e.target.value)} 
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="language">Language</Label>
-                      <Select value={language} onValueChange={setLanguage}>
-                        <SelectTrigger id="language">
-                          <SelectValue placeholder="Select language" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="en">English</SelectItem>
-                          <SelectItem value="es">Spanish</SelectItem>
-                          <SelectItem value="fr">French</SelectItem>
-                          <SelectItem value="de">German</SelectItem>
-                          <SelectItem value="zh">Chinese</SelectItem>
-                        </SelectContent>
-                      </Select>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-6"
+      >
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid grid-cols-4 lg:grid-cols-4 mb-8">
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span className="hidden md:inline">Profile</span>
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              <span className="hidden md:inline">Notifications</span>
+            </TabsTrigger>
+            <TabsTrigger value="appearance" className="flex items-center gap-2">
+              <Palette className="h-4 w-4" />
+              <span className="hidden md:inline">Appearance</span>
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              <span className="hidden md:inline">Security</span>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="profile">
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Information</CardTitle>
+                  <CardDescription>
+                    Update your account profile information and details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleProfileSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Full Name</Label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            id="name" 
+                            className="pl-10" 
+                            value={profileForm.name}
+                            onChange={(e) => setProfileForm({...profileForm, name: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email Address</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            id="email" 
+                            type="email" 
+                            className="pl-10" 
+                            value={profileForm.email}
+                            onChange={(e) => setProfileForm({...profileForm, email: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone Number</Label>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            id="phone" 
+                            className="pl-10" 
+                            value={profileForm.phone}
+                            onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="company">Company</Label>
+                        <div className="relative">
+                          <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            id="company" 
+                            className="pl-10" 
+                            value={profileForm.company}
+                            onChange={(e) => setProfileForm({...profileForm, company: e.target.value})}
+                          />
+                        </div>
+                      </div>
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="timezone">Timezone</Label>
-                      <Select value={timezone} onValueChange={setTimezone}>
-                        <SelectTrigger id="timezone">
-                          <SelectValue placeholder="Select timezone" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="UTC">UTC</SelectItem>
-                          <SelectItem value="EST">Eastern Time (EST)</SelectItem>
-                          <SelectItem value="CST">Central Time (CST)</SelectItem>
-                          <SelectItem value="MST">Mountain Time (MST)</SelectItem>
-                          <SelectItem value="PST">Pacific Time (PST)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Appearance</h3>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="primaryColor">Primary Color</Label>
-                    <div className="flex items-center gap-2">
-                      <Input 
-                        id="primaryColor" 
-                        type="color" 
-                        className="w-12 h-10" 
-                        value={primaryColor} 
-                        onChange={(e) => setPrimaryColor(e.target.value)} 
-                      />
-                      <Input 
-                        type="text" 
-                        value={primaryColor} 
-                        onChange={(e) => setPrimaryColor(e.target.value)} 
-                        className="flex-1" 
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Dark Mode</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Switch between light and dark mode
-                      </p>
-                    </div>
-                    <div>
-                      <Button variant="outline">
-                        <Paintbrush className="h-4 w-4 mr-2" />
-                        Toggle Theme
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                    <Button type="submit" className="flex items-center gap-2 mt-4">
+                      <Save className="h-4 w-4" />
+                      Save Changes
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
           
-          <TabsContent value="email" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Notification Settings</CardTitle>
-                <CardDescription>
-                  Manage how and when you receive notifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
+          <TabsContent value="notifications">
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notification Preferences</CardTitle>
+                  <CardDescription>
+                    Configure how you receive notifications and alerts
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="emailNotifications">Email Notifications</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="email-notifications">Email Notifications</Label>
                       <p className="text-sm text-muted-foreground">
-                        Receive email notifications for important events
+                        Receive notifications via email
                       </p>
                     </div>
                     <Switch 
-                      id="emailNotifications" 
-                      checked={emailNotifications} 
-                      onCheckedChange={setEmailNotifications} 
+                      id="email-notifications" 
+                      checked={notificationSettings.emailNotifications}
+                      onCheckedChange={(checked) => handleNotificationChange('emailNotifications', checked)}
                     />
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="weeklyDigest">Weekly Digest</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="sms-notifications">SMS Notifications</Label>
                       <p className="text-sm text-muted-foreground">
-                        Receive a weekly summary of platform activity
+                        Receive notifications via text message
                       </p>
                     </div>
                     <Switch 
-                      id="weeklyDigest" 
-                      checked={weeklyDigest} 
-                      onCheckedChange={setWeeklyDigest} 
+                      id="sms-notifications" 
+                      checked={notificationSettings.smsNotifications}
+                      onCheckedChange={(checked) => handleNotificationChange('smsNotifications', checked)}
                     />
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="systemAlerts">System Alerts</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="push-notifications">Push Notifications</Label>
                       <p className="text-sm text-muted-foreground">
-                        Receive notifications about system updates and maintenance
+                        Receive in-app push notifications
                       </p>
                     </div>
                     <Switch 
-                      id="systemAlerts" 
-                      checked={systemAlerts} 
-                      onCheckedChange={setSystemAlerts} 
+                      id="push-notifications" 
+                      checked={notificationSettings.pushNotifications}
+                      onCheckedChange={(checked) => handleNotificationChange('pushNotifications', checked)}
                     />
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="marketingEmails">Marketing Emails</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="marketing-emails">Marketing Emails</Label>
                       <p className="text-sm text-muted-foreground">
-                        Receive promotional emails and newsletters
+                        Receive marketing and promotional emails
                       </p>
                     </div>
                     <Switch 
-                      id="marketingEmails" 
-                      checked={marketingEmails} 
-                      onCheckedChange={setMarketingEmails} 
+                      id="marketing-emails" 
+                      checked={notificationSettings.marketingEmails}
+                      onCheckedChange={(checked) => handleNotificationChange('marketingEmails', checked)}
                     />
                   </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Email Templates</h3>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="font-medium">Welcome Email</span>
-                        <p className="text-sm text-muted-foreground">Sent when a new user registers</p>
-                      </div>
-                      <Button variant="outline" size="sm">Edit</Button>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="font-medium">Payment Confirmation</span>
-                        <p className="text-sm text-muted-foreground">Sent after successful payment</p>
-                      </div>
-                      <Button variant="outline" size="sm">Edit</Button>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="font-medium">Password Reset</span>
-                        <p className="text-sm text-muted-foreground">Sent when a user requests password reset</p>
-                      </div>
-                      <Button variant="outline" size="sm">Edit</Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
           
-          <TabsContent value="security" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Security Settings</CardTitle>
-                <CardDescription>
-                  Manage security settings and policies
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
+          <TabsContent value="appearance">
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Appearance Settings</CardTitle>
+                  <CardDescription>
+                    Customize the appearance of the application
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="requireMFA">Require Multi-Factor Authentication</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="dark-mode">Dark Mode</Label>
                       <p className="text-sm text-muted-foreground">
-                        Require all users to set up MFA for enhanced security
+                        Toggle between light and dark mode
                       </p>
                     </div>
                     <Switch 
-                      id="requireMFA" 
-                      checked={requireMFA} 
-                      onCheckedChange={setRequireMFA} 
+                      id="dark-mode" 
+                      checked={darkMode}
+                      onCheckedChange={handleThemeChange}
                     />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
-                    <Input 
-                      id="sessionTimeout" 
-                      type="number" 
-                      min="5" 
-                      max="480" 
-                      value={sessionTimeout} 
-                      onChange={(e) => setSessionTimeout(e.target.value)} 
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Automatically log users out after the specified period of inactivity
-                    </p>
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Password Policy</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                </CardContent>
+              </Card>
+            </motion.div>
+          </TabsContent>
+          
+          <TabsContent value="security">
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Password Settings</CardTitle>
+                  <CardDescription>
+                    Update your password and security settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handlePasswordSubmit} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="passwordRotation">Password Rotation (days)</Label>
-                      <Input 
-                        id="passwordRotation" 
-                        type="number" 
-                        min="0" 
-                        max="365" 
-                        value={passwordRotation} 
-                        onChange={(e) => setPasswordRotation(e.target.value)} 
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Require password change every X days (0 to disable)
-                      </p>
+                      <Label htmlFor="current-password">Current Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          id="current-password" 
+                          type="password" 
+                          className="pl-10" 
+                          value={passwordForm.currentPassword}
+                          onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                        />
+                      </div>
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="minPasswordLength">Minimum Password Length</Label>
-                      <Input 
-                        id="minPasswordLength" 
-                        type="number" 
-                        min="6" 
-                        max="32" 
-                        value={minPasswordLength} 
-                        onChange={(e) => setMinPasswordLength(e.target.value)} 
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Minimum number of characters required
-                      </p>
+                      <Label htmlFor="new-password">New Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          id="new-password" 
+                          type="password" 
+                          className="pl-10" 
+                          value={passwordForm.newPassword}
+                          onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Require Complex Passwords</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Require uppercase, lowercase, numbers and symbols
-                      </p>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">Confirm New Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          id="confirm-password" 
+                          type="password" 
+                          className="pl-10" 
+                          value={passwordForm.confirmPassword}
+                          onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                        />
+                      </div>
                     </div>
-                    <Switch defaultChecked />
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Admin Actions</h3>
-                  
-                  <div className="flex flex-col gap-3">
-                    <Button variant="outline" className="justify-start">
-                      <Lock className="h-4 w-4 mr-2" />
-                      Change Admin Password
-                    </Button>
                     
-                    <Button variant="outline" className="justify-start">
-                      <MailCheck className="h-4 w-4 mr-2" />
-                      Verify Admin Email
+                    <Button type="submit" className="flex items-center gap-2 mt-4">
+                      <Save className="h-4 w-4" />
+                      Change Password
                     </Button>
-                    
-                    <Button variant="outline" className="justify-start">
-                      <User className="h-4 w-4 mr-2" />
-                      Manage Admin Accounts
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  </form>
+                </CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
-          
-          <TabsContent value="api" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>API Settings</CardTitle>
-                <CardDescription>
-                  Manage API keys and webhook settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="apiKey">API Key</Label>
-                    <div className="flex gap-2">
-                      <Input 
-                        id="apiKey" 
-                        value={apiKey} 
-                        readOnly 
-                        type="password"
-                        className="flex-1" 
-                      />
-                      <Button variant="outline" onClick={copyApiKey}>Copy</Button>
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-xs text-muted-foreground">
-                        <strong>Warning:</strong> Keep this key secret. Anyone with this key can access your API.
-                      </p>
-                      <Button variant="outline" size="sm" onClick={regenerateApiKey}>
-                        Regenerate
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="webhookUrl">Webhook URL</Label>
-                    <Input 
-                      id="webhookUrl" 
-                      value={webhookUrl} 
-                      onChange={(e) => setWebhookUrl(e.target.value)} 
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      URL to receive webhook notifications
-                    </p>
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Connected Integrations</h3>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 border rounded-md">
-                      <div className="flex items-center gap-3">
-                        <div className="bg-blue-100 p-2 rounded-full">
-                          <CreditCard className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Stripe</h4>
-                          <p className="text-xs text-muted-foreground">Payment processing</p>
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-                        Connected
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 border rounded-md">
-                      <div className="flex items-center gap-3">
-                        <div className="bg-red-100 p-2 rounded-full">
-                          <Mail className="h-5 w-5 text-red-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Mailchimp</h4>
-                          <p className="text-xs text-muted-foreground">Email marketing</p>
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-                        Not connected
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 border rounded-md">
-                      <div className="flex items-center gap-3">
-                        <div className="bg-purple-100 p-2 rounded-full">
-                          <MessageSquare className="h-5 w-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Slack</h4>
-                          <p className="text-xs text-muted-foreground">Notifications</p>
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-                        Not connected
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  <Button className="w-full">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add New Integration
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </motion.div>
-      </Tabs>
+        </Tabs>
+      </motion.div>
     </div>
   );
 };
